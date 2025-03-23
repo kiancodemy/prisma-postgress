@@ -4,3 +4,6 @@ export const hashpass = async (pass: string) => {
   const create = await bcrypt.hash(pass, saltRounds);
   return create;
 };
+export const comapreHashpass = async (pass: string, hash: string) => {
+  return bcrypt.compare(pass, hash);
+};

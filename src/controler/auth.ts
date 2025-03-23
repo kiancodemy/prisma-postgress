@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import { hashpass, comapreHashpass } from "../hashpassword";
+import { jwtmaker } from "../jwtmaker";
+
 import { prisma } from "../index";
 const signup = async (req: Request, res: Response) => {
   try {
@@ -14,11 +17,12 @@ const signup = async (req: Request, res: Response) => {
     if (find) {
       throw new Error("the email is already exist");
     }
+    const hashedpassword = await hashpass(password);
     const create = prisma.user.create({
       data: {
         name,
         email,
-        password,
+        password: hashedpassword,
       },
     });
     res.status(201).json(create);
@@ -26,5 +30,43 @@ const signup = async (req: Request, res: Response) => {
     res.status(404).json({ message: err.message });
   }
 };
-const login = async (req: Request, res: Response) => {};
+const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      throw new Error("fill all the sections");
+    }
+    const find = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        password: true,
+      },
+    });
+    if (!find) {
+      throw new Error("the user has not found ");
+    }
+    const compare = await comapreHashpass(password, find.password);
+    if (compare && find) {
+      const cookie = await jwtmaker(find.id);
+      res.cookie("jwt", cookie, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000,
+      });
+    } else {
+      throw new Error("password is wrong ");
+    }
+    res.status(201).json({
+      message: "sucessfull",
+    });
+  } catch (err: any) {
+    res.status(404).json({
+      message: err.message,
+    });
+  }
+};
 export { signup, login };
