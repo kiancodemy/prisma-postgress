@@ -3,7 +3,7 @@ import { hashpass, comapreHashpass } from "../hashpassword";
 import { jwtmaker } from "../jwtmaker";
 
 import { prisma } from "../index";
-const signup = async (req: Request, res: Response) => {
+export const signup:any = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -18,7 +18,7 @@ const signup = async (req: Request, res: Response) => {
       throw new Error("the email is already exist");
     }
     const hashedpassword = await hashpass(password);
-    const create = prisma.user.create({
+    const create = await prisma.user.create({
       data: {
         name,
         email,
@@ -30,7 +30,7 @@ const signup = async (req: Request, res: Response) => {
     res.status(404).json({ message: err.message });
   }
 };
-const login = async (req: Request, res: Response) => {
+export const login:any = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -41,6 +41,7 @@ const login = async (req: Request, res: Response) => {
         email,
       },
       select: {
+        name: true,
         id: true,
         password: true,
       },
@@ -51,7 +52,7 @@ const login = async (req: Request, res: Response) => {
     const compare = await comapreHashpass(password, find.password);
     if (compare && find) {
       const cookie = await jwtmaker(find.id);
-      res.cookie("jwt", cookie, {
+      await res.cookie("jwt", cookie, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
@@ -69,4 +70,3 @@ const login = async (req: Request, res: Response) => {
     });
   }
 };
-export { signup, login };

@@ -8,7 +8,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
+enum Role {
+  ADMIN
+  USER
+  
+}
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -16,7 +20,44 @@ model User {
   password  String  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  role      Role     @default(USER)
+  addresses Adress[]
 
   @@map("users")
   
 }
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String  
+  tags        String
+  price       Decimal  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+ 
+ 
+
+  @@map("products")
+  
+}
+model Adress {
+  id          Int      @id @default(autoincrement())
+  lineone     String
+  city        String
+  country     String
+  pincode     String
+  userid      Int
+  user        User     @relation(fields: [userid],references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+
+ 
+ 
+ 
+
+  @@map("addresses")
+  
+}
+
