@@ -1,7 +1,11 @@
 import { Response, Request, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../index";
-export const auth = async (req: Request, res: Response, next: NextFunction) => {
+export const auth: any = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const token = req.cookies.jwt;
 

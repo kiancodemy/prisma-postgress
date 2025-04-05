@@ -3,7 +3,7 @@ import { hashpass, comapreHashpass } from "../hashpassword";
 import { jwtmaker } from "../jwtmaker";
 
 import { prisma } from "../index";
-export const signup:any = async (req: Request, res: Response) => {
+export const signup: any = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -30,7 +30,7 @@ export const signup:any = async (req: Request, res: Response) => {
     res.status(404).json({ message: err.message });
   }
 };
-export const login:any = async (req: Request, res: Response) => {
+export const login: any = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -69,4 +69,32 @@ export const login:any = async (req: Request, res: Response) => {
       message: err.message,
     });
   }
+};
+export const all: any = async (req: Request, res: Response) => {
+  const find = await prisma.adress.findFirst({
+    where: {
+      userid: 1,
+    },
+    select: {
+      city: true,
+      user: {
+        select: {
+          email: true,
+        },
+      },
+    },
+  });
+  res.status(201).json(find);
+};
+
+export const updateuser: any = async (req: Request, res: Response) => {
+  const findUser = await prisma.user.update({
+    where: {
+      id: 1,
+    },
+    data: {
+      ...req.body,
+    },
+  });
+  res.status(201).json(findUser);
 };
